@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Form Pemesanan via WA</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #e8f5e9;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h2 {
+        text-align: center;
+        color: #388e3c;
+      }
+
+      form {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 25px;
+        max-width: 600px;
+        margin: auto;
+        border: 1px solid #4CAF50;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+        color: #388e3c;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      textarea {
+        resize: none;
+      }
+
+      .form-section {
+        background-color: #f1f8e9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+
+      /* Modal Styling */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .modal button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .modal button:hover {
+        background-color: #45a049;
+      }
+
+      /* Loading Indicator */
+      #loadingIndicator {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- GGSSPEED Logo -->
+    <div style="text-align: center;">
+      <img src="https://i.ibb.co/yYNKq8R/LOGO-GGSSPEED.png" width="400">
+    </div>
+
+    <h2>🛵 Form Pemesanan via WA</h2>
+    <h2>Sampai ke Ngirim Pesan ke WA admin ya kack</h2>
+    <form id="orderForm">
+      <label for="jenis">🛒 Jenis Pesanan:</label>
+      <select id="jenis" name="jenis" required>
+        <option value="makanan">🍽️ Pesanan Makanan</option>
+        <option value="ojek">🚗 Pesanan Ojek</option>
+      </select>
+
+      <label for="nama">👤 Nama Pembeli:</label>
+      <input type="text" id="nama" name="nama" required>
+
+      <label for="nomor">📱 Nomor HP:</label>
+      <input type="text" id="nomor" name="nomor" required>
+
+      <label for="metode">💰 Metode Pembayaran:</label>
+      <select id="metode" name="metode">
+        <option value="Cash">Cash</option>
+        <option value="Transfer">Transfer</option>
+      </select>
+
+      <label for="alamat">🏠 Alamat Kos / Rumah:</label>
+      <textarea id="alamat" name="alamat" rows="3" required></textarea>
+
+      <div id="makananSection" class="form-section">
+        <label for="item">🍴 Daftar Pesanan:</label>
+        <textarea id="item" name="item" rows="3" placeholder="Contoh: Nasi Goreng Cak Siapa"></textarea>
+      </div>
+
+      <div id="ojekSection" class="form-section" style="display:none;">
+        <label for="tujuan">📍 Tujuan:</label>
+        <textarea id="tujuan" name="tujuan" rows="2" placeholder="Tuliskan tujuan Anda"></textarea>
+      </div>
+
+      <label for="catatan">📝 Catatan Pembeli:</label>
+      <textarea id="catatan" name="catatan" rows="3" placeholder="Tuliskan catatan jika ada..."></textarea>
+
+      <button type="submit">lanjut WA yukkk ditunggu yaa</button>
+    </form>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator">
+      <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." width="50">
+      <p>Sedang memproses pesanan, harap tunggu......</p>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="waModal" class="modal">
+      <div class="modal-content">
+        <p>Pesananmu akan diarahkan ke WhatsApp</p>
+        <p>ikuti sampai kirim pesan WhatsApp ke admin yaaa</p>
+        <button id="okButton">OK</button>
+      </div>
+    </div>
+
+    <div id="response"></div>
+
+    <script>
+      document.getElementById("jenis").addEventListener("change", function() {
+        var jenisPesanan = this.value;
+        var makananSection = document.getElementById("makananSection");
+        var ojekSection = document.getElementById("ojekSection");
+        if (jenisPesanan === "ojek") {
+          makananSection.style.display = "none";
+          ojekSection.style.display = "block";
+        } else {
+          makananSection.style.display = "block";
+          ojekSection.style.display = "none";
+        }
+      });
+
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxR_XgdA54Ba2vzi8S6WPyKp3zZKmWtxF1ZzacW0GkYgL2rJdhTlihMKizN_1-2FcXnsw/exec';
+      const form = document.getElementById('orderForm');
+      const responseDiv = document.getElementById('response');
+      const waModal = document.getElementById('waModal');
+      const okButton = document.getElementById('okButton');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+
+      let formData; // Tempat untuk menyimpan form data
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Tampilkan modal
+        waModal.style.display = 'block';
+
+        // Ambil nilai dari form dan simpan di formData
+        formData = new FormData(form);
+
+        // Sembunyikan loading dulu
+        loadingIndicator.style.display = 'none';
+      });
+
+      okButton.onclick = function() {
+        // Tampilkan indikator loading
+        loadingIndicator.style.display = 'block';
+
+        // Simpan ke Google Sheets
+        fetch(scriptURL, { method: 'POST', body: formData })
+          .then(response => {
+            loadingIndicator.style.display = 'none'; // Sembunyikan loading
+            responseDiv.innerHTML = "Data berhasil disimpan ke Google Sheets.";
+            
+            // Pesan untuk WhatsApp
+            var jenis = formData.get("jenis");
+            var nama = formData.get("nama");
+            var nomor = formData.get("nomor");
+            var metode = formData.get("metode");
+            var alamat = formData.get("alamat");
+            var item = formData.get("item");
+            var tujuan = formData.get("tujuan");
+            var catatan = formData.get("catatan");
+
+            var pesan = `Hallo GGSSPEED! Saya ingin ${jenis === 'ojek' ? 'memesan ojek' : 'membeli produk'} dengan keterangan sebagai berikut:\n\n` +
+                        `📦 *DATA PEMBELI*\n` +
+                        `===============================\n` +
+                        `👤 Nama               : ${nama}\n` +
+                        `📱 Nomor HP           : ${nomor}\n` +
+                        `💳 Metode Pembayaran  : ${metode}\n` +
+                        `🏠 Alamat Kos / Rumah : ${alamat}\n\n`;
+
+            if (jenis === 'makanan') {
+                pesan += `===============================\n` +
+                         `🍽 *DAFTAR BELANJAAN*\n` +
+                         `===============================\n` +
+                         `🍴 Pesanan : ${item}\n\n`;
+            } else {
+                pesan += `===============================\n` +
+                         `🚗 *DETAIL OJEK*\n` +
+                         `===============================\n` +
+                         `📍 Tujuan : ${tujuan}\n\n`;
+            }
+
+            pesan += `===============================\n` +
+                     `📝 *CATATAN*\n` +
+                     `===============================\n` +
+                     `${catatan}\n\n` +
+                     `🙏 Terima kasih.`;
+
+            // Tautan WhatsApp
+            var waLink = `https://wa.me/6283145891511?text=${encodeURIComponent(pesan)}`;
+
+            // Tutup modal dan arahkan ke WhatsApp
+            waModal.style.display = "none"; 
+            window.location.href = waLink;
+          })
+          .catch(error => {
+            loadingIndicator.style.display = 'none'; // Sembunyikan loading
+            responseDiv.innerHTML = "Gagal menyimpan data ke Google Sheets: " + error.message;
+          });
+      };
+    </script>
+</body>
+</html>
